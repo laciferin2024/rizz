@@ -7,13 +7,26 @@ from seahorse.prelude import *
 declare_id('Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS')
 
 
+class Guest:
+    keysOwned: u8
+    address: Pubkey
+
+
 # Define a data structure for the Room
 class Room(Account):
     id: u64
     owner: Pubkey
     price: u64
+    # guest: Pubkey | None 
     is_locked: bool
+    guests: Array[Guest]
     
+
+    @property
+    def guest(self):
+      guests = sorted(self.guests, key=lambda x: x.keysOwned)
+      self.guests = guests
+      return guests[-1]          
 
 
 # @instruction
