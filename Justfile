@@ -11,3 +11,12 @@ default: install
 
 install:
   poetry install --root
+
+solana-config:
+  solana config set --url https://api.devnet.solana.com
+  solana config set --keypair ./scripts/my-keypair.json
+
+airdrop:
+  solana airdrop 5
+
+fund: airdrop
