@@ -25,9 +25,14 @@ class Room(Account):
 
     @property
     def guest(self)->Guest:
-      guests = sorted(self.guests, key=lambda x: self.guests[x].keysOwned)
-    #   self.guests = guests
-      return guests[-1]          
+      gtGuest:Guest = None
+      
+      for k,v in self.guests.items():
+          if gtGuest is None or gtGuest.keysOwned<v.keysOwned:
+              gtGuest = v.keysOwned
+
+
+      return gtGuest        
   
     def incK(self,incVal:BuySell, _guest:Pubkey)->Guest:
         g = self.guests[_guest]
@@ -84,3 +89,9 @@ def sell_key(room: Room, seller: Signer):
     seller.save()
     
 
+@instruction
+def leading_guest(room: Room)->Guest:
+    guest = room.guest
+    assert guest, "Guest not found"
+    return guest
+    
