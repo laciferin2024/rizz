@@ -10,21 +10,30 @@ class Guest:
     keysOwned: u8
     address: Pubkey
 
+class BuySell(Enum):
+    BUY=1
+    SELL=-1
 
 class Room(Account):
     id: u64
     owner: Pubkey
-    curPrice: u64
+    curPrice: u64 
     # guest: Pubkey | None 
     is_locked: bool
-    guests: Array[Guest]
+    guests: Dict[Pubkey,Guest]
     
 
     @property
-    def guest(self):
-      guests = sorted(self.guests, key=lambda x: x.keysOwned)
-      self.guests = guests
+    def guest(self)->Guest:
+      guests = sorted(self.guests, key=lambda x: self.guests[x].keysOwned)
+    #   self.guests = guests
       return guests[-1]          
+  
+    def incK(self,incVal:BuySell, _guest:Pubkey)->Guest:
+        g = self.guests[_guest]
+        g.keysOwned+=incVal
+        return g
+        
 
 
 # @instruction
@@ -46,10 +55,17 @@ def init_room(owner: Pubkey, room: Empty[Room], room_id: u64, price: u64):
 
 #Buy a key
 @instruction
-def buy_key(room: Room):
+def buy_key(room: Room,buyer:Signer):
     assert room.is_locked, "Room is not locked"
     assert room.curPrice < 0, "Key is not available for sale"
+    
+    buyer.transfer_lamports(room,room.curPrice)
+    buyer.save()
+
     room.curPrice*=1.1
+
+    room.incK(BuySell.BUY, buyer.key())
+    
     room.save()
 
     # assert room_account.curPrice <= 1000, "Insufficient funds"  
@@ -58,8 +74,13 @@ def buy_key(room: Room):
 
 # Sell a key
 @instruction
-def sell_key(room: Room, new_price: u64):
+def sell_key(room: Room, seller: Signer):
     assert not room.is_locked, "Room is already locked"
+    
+    room.transfer_lamports(room,seller.curPrice)
     room.curPrice/=1.1
+    
     room.save()
+    seller.save()
+    
 
