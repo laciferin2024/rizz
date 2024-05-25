@@ -5,7 +5,7 @@ from seahorse.prelude import *
 
 declare_id('Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS')
 
-
+# dataclass is supported
 class Guest:
     keysOwned: u8
     address: Pubkey
@@ -21,7 +21,6 @@ class Room(Account):
     # guest: Pubkey | None 
     is_locked: bool
     guests: Dict[Pubkey,Guest]
-    
 
     @property
     def guest(self)->Guest:
@@ -39,7 +38,8 @@ class Room(Account):
         g.keysOwned+=incVal
         return g
         
-
+    def get_guest(self, _guest:Pubkey)->Guest:
+        return self.guests[_guest]
 
 # @instruction
 # def use_sol_usd_price(price_account: PriceAccount):
@@ -92,6 +92,9 @@ def sell_key(room: Room, seller: Signer):
 @instruction
 def leading_guest(room: Room)->Guest:
     guest = room.guest
-    assert guest, "Guest not found"
+    assert guest, "No Guests so far"
     return guest
     
+@instruction
+def get_user(room:Room, user:Pubkey):
+    room.get_guest(user)
