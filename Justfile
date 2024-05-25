@@ -29,3 +29,12 @@ setup:
 
 seahorse *ARGS:
   seahorse {{ARGS}}
+
+build:  
+  seahorse build 
+
+
+
+
+test:
+  anchor test --skip-deploy
