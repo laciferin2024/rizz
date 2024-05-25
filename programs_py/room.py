@@ -1,101 +1,88 @@
-# Built with Seahorse v0.2.7
-
 from seahorse.prelude import *
-# from seahorse.pyth import *
 
 declare_id('Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS')
 
-# dataclass is supported
 @dataclass
 class Guest:
-    keysOwned: u8
+    keys_owned: u8
     address: Pubkey
 
 class BuySell(Enum):
-    BUY=1
-    SELL=-1
+    BUY = 1
+    SELL = -1
 
 class Room(Account):
     id: u64
     owner: Pubkey
-    curPrice: u64 
-    # guest: Pubkey | None 
+    cur_price: u64
     is_locked: bool
-    guests: Dict[Pubkey,Guest]
+    guests: List[Tuple[Pubkey, Guest]]
 
     @property
-    def guest(self)->Guest:
-      gtGuest:Guest = None
-      
-      for k,v in self.guests.items():
-          if gtGuest is None or gtGuest.keysOwned<v.keysOwned:
-              gtGuest = v.keysOwned
+    def leading_guest(self) -> Guest:
+        leading_guest = None
 
+        for guest_tuple in self.guests:
+            guest = guest_tuple[1]
+            if leading_guest is None or guest.keys_owned > leading_guest.keys_owned:
+                leading_guest = guest
 
-      return gtGuest        
-  
-    def incK(self,incVal:BuySell, _guest:Pubkey)->Guest:
-        g = self.guests[_guest]
-        g.keysOwned+=incVal
-        return g
+        return leading_guest
+
+    def inc_keys_owned(self, inc_val: BuySell, guest_pubkey: Pubkey) -> Guest:
+        for idx, guest_tuple in enumerate(self.guests):
+            if guest_tuple[0] == guest_pubkey:
+                guest = guest_tuple[1]
+                guest.keys_owned += inc_val
+                self.guests[idx] = (guest_pubkey, guest)
+                return guest
+       
+
+    def get_guest(self, guest_pubkey: Pubkey) -> Guest:
+        for guest_tuple in self.guests:
+            if guest_tuple[0] == guest_pubkey:
+                return guest_tuple[1]
         
-    def get_guest(self, _guest:Pubkey)->Guest:
-        return self.guests[_guest]
-
-# @instruction
-# def use_sol_usd_price(price_account: PriceAccount):
-#   price_feed = price_account.validate_price_feed('SOL/USD')
-
-# Initialize the Room
 @instruction
 def init_room(owner: Pubkey, room: Empty[Room], room_id: u64, price: u64):
     room.init(
         owner=owner.key,
-        price=5980500,#3$#TODO: use pyth oracle
+        price=5980500,
     )
     room.id = room_id
     room.owner = owner
-    room.price = price
+    room.cur_price = price
     room.is_locked = False
+    room.guests = []
     room.save()
 
-#Buy a key
 @instruction
-def buy_key(room: Room,buyer:Signer):
+def buy_key(room: Room, buyer: Signer):
     assert room.is_locked, "Room is not locked"
-    assert room.curPrice < 0, "Key is not available for sale"
-    
-    buyer.transfer_lamports(room,room.curPrice)
+    assert room.cur_price < 0, "Key is not available for sale"
+
+    buyer.transfer_lamports(room, room.cur_price)
     buyer.save()
 
-    room.curPrice*=1.1
-
-    room.incK(BuySell.BUY, buyer.key())
-    
+    room.cur_price *= 1.1
+    room.inc_keys_owned(BuySell.BUY, buyer.key())
     room.save()
 
-    # assert room_account.curPrice <= 1000, "Insufficient funds"  
-    # Transfer funds to the room owner (or escrow account) and grant access to the buyer
-    # Implement this logic based on your use case
-
-# Sell a key
 @instruction
 def sell_key(room: Room, seller: Signer):
     assert not room.is_locked, "Room is already locked"
-    
-    room.transfer_lamports(room,seller.curPrice)
-    room.curPrice/=1.1
-    
+
+    room.transfer_lamports(room, seller.cur_price)
+    room.cur_price /= 1.1
     room.save()
     seller.save()
-    
 
 @instruction
-def leading_guest(room: Room)->Guest:
-    guest = room.guest
+def leading_guest(room: Room) -> Guest:
+    guest = room.leading_guest
     assert guest, "No Guests so far"
     return guest
-    
+
 @instruction
-def get_user(room:Room, user:Pubkey):
+def get_user(room: Room, user: Pubkey):
     room.get_guest(user)
