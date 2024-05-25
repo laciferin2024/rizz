@@ -78,3 +78,22 @@ tests/reports
 
 *-keypair.json
 
+node_modules/
+.env
+.env.*
+!.env.example
+
+.DS_Store
+.idea/
+.run/
+
+
+.netlify/
+
+.anchor
+.DS_Store
+target
+**/*.rs.bk
+node_modules
+test-ledger
+
