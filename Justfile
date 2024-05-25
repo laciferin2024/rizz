@@ -20,3 +20,8 @@ airdrop:
   solana airdrop 5
 
 fund: airdrop
+
+setup:
+  rustup component add rustfmt 
+  cargo install seahorse-lang
+  seahorse -- version
