@@ -75,3 +75,6 @@ You can modify this file as per your specific requirements.
 /selenium-screenshot*.png
 
 tests/reports
+
+*-keypair.json
+
