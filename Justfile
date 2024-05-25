@@ -24,4 +24,8 @@ fund: airdrop
 setup:
   rustup component add rustfmt 
   cargo install seahorse-lang
+  cargo install --git https://github.com/coral-xyz/anchor avm --locked --force
   seahorse -- version
+
+seahorse *ARGS:
+  seahorse {{ARGS}}

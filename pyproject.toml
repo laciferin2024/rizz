@@ -12,7 +12,6 @@ keywords = ["solana", "web3Bumble"]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-seahorse = "^1.0.3"
 
 [tool.poetry.group.dev.dependencies]
 flake8 = "^6.1.0"
