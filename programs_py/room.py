@@ -68,7 +68,7 @@ def buy_key(room: Room, buyer: Signer):
 
     buyer.transfer_lamports(room, room.cur_price)
 
-    room.cur_price +=1 #TODO
+    room.cur_price += u64(room.cur_price*.1)
     # room.inc_keys_owned(BuySell.BUY, buyer.key()) FIXME:
 
 @instruction
