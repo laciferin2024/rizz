@@ -33,7 +33,7 @@ seahorse *ARGS:
 build:  
   seahorse build 
 
-
+b: build
 
 
 test:

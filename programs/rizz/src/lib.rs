@@ -167,4 +167,114 @@ mod rizz {
     use super::*;
     use seahorse_util::*;
     use std::collections::HashMap;
+
+    #[derive(Accounts)]
+    pub struct BuyKey<'info> {
+        #[account(mut)]
+        pub room: Box<Account<'info, dot::program::Room>>,
+        #[account(mut)]
+        pub buyer: Signer<'info>,
+        pub system_program: Program<'info, System>,
+    }
+
+    pub fn buy_key(ctx: Context<BuyKey>) -> Result<()> {
+        let mut programs = HashMap::new();
+
+        programs.insert(
+            "system_program",
+            ctx.accounts.system_program.to_account_info(),
+        );
+
+        let programs_map = ProgramsMap(programs);
+        let room = dot::program::Room::load(&mut ctx.accounts.room, &programs_map);
+        let buyer = SeahorseSigner {
+            account: &ctx.accounts.buyer,
+            programs: &programs_map,
+        };
+
+        buy_key_handler(room.clone(), buyer.clone());
+
+        dot::program::Room::store(room);
+
+        return Ok(());
+    }
+
+    #[derive(Accounts)]
+    # [instruction (user : Pubkey)]
+    pub struct GetUser<'info> {
+        #[account(mut)]
+        pub room: Box<Account<'info, dot::program::Room>>,
+    }
+
+    pub fn get_user(ctx: Context<GetUser>, user: Pubkey) -> Result<()> {
+        let mut programs = HashMap::new();
+        let programs_map = ProgramsMap(programs);
+        let room = dot::program::Room::load(&mut ctx.accounts.room, &programs_map);
+
+        get_user_handler(room.clone(), user);
+
+        dot::program::Room::store(room);
+
+        return Ok(());
+    }
+
+    #[derive(Accounts)]
+    pub struct InitRoom<'info> {
+        #[account(mut)]
+        pub owner: Signer<'info>,
+        # [account (init , space = std :: mem :: size_of :: < dot :: program :: Room > () + 8 , payer = owner , seeds = ["Rizz" . as_bytes () . as_ref () , owner . key () . as_ref () , "room" . as_bytes () . as_ref () , "rizz" . as_bytes () . as_ref ()] , bump)]
+        pub room: Box<Account<'info, dot::program::Room>>,
+        pub rent: Sysvar<'info, Rent>,
+        pub system_program: Program<'info, System>,
+    }
+
+    pub fn init_room(ctx: Context<InitRoom>) -> Result<()> {
+        let mut programs = HashMap::new();
+
+        programs.insert(
+            "system_program",
+            ctx.accounts.system_program.to_account_info(),
+        );
+
+        let programs_map = ProgramsMap(programs);
+        let owner = SeahorseSigner {
+            account: &ctx.accounts.owner,
+            programs: &programs_map,
+        };
+
+        let room = Empty {
+            account: dot::program::Room::load(&mut ctx.accounts.room, &programs_map),
+            bump: ctx.bumps.get("room").map(|bump| *bump),
+        };
+
+        init_room_handler(owner.clone(), room.clone());
+
+        dot::program::Room::store(room.account);
+
+        return Ok(());
+    }
+
+    #[derive(Accounts)]
+    pub struct SellKey<'info> {
+        #[account(mut)]
+        pub room: Box<Account<'info, dot::program::Room>>,
+        #[account(mut)]
+        pub seller: Signer<'info>,
+    }
+
+    pub fn sell_key(ctx: Context<SellKey>) -> Result<()> {
+        let mut programs = HashMap::new();
+        let programs_map = ProgramsMap(programs);
+        let room = dot::program::Room::load(&mut ctx.accounts.room, &programs_map);
+        let seller = SeahorseSigner {
+            account: &ctx.accounts.seller,
+            programs: &programs_map,
+        };
+
+        sell_key_handler(room.clone(), seller.clone());
+
+        dot::program::Room::store(room);
+
+        return Ok(());
+    }
 }
