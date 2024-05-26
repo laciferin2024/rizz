@@ -24,15 +24,15 @@ class Room(Account):
     guests: Array[Guest,10000]
 
     def leading_guest(self) -> Guest:
+        leading_guest:Guest
 
         for guestI in self.guests:
             guest:Guest = guestI
-            leading_guest:Guest 
-            
             if leading_guest is None or guest.keys_owned> leading_guest.keys_owned:
-                leading_guest = guest   
-                return leading_guest             
+                leading_guest = guest
+                return leading_guest
 
+        return leading_guest
 
     # def inc_keys_owned(self, inc_val: BuySell, guest_pubkey: Pubkey) -> Guest:
     #     for idx, guest_tuple in enumerate(self.guests):
