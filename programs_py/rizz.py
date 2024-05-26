@@ -6,11 +6,12 @@ declare_id('Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS')
 class Guest:
     keys_owned: u8
     address: Pubkey
-    
+
 # class Guests(NamedTuple):
 #     id:Pubkey
-    
-    
+
+# Guest = NamedTuple('Guest', [('u8', int), ('Pubkey', Pubkey)])
+
 
 class BuySell(Enum):
     BUY = 1
@@ -21,7 +22,7 @@ class Room(Account):
     owner: Pubkey
     cur_price: u64
     is_locked: bool
-    guests: List[Guest]
+    guests: Array[Guest,10]
 
     # def leading_guest(self) -> Guest:
     #     leading_guest:Guest

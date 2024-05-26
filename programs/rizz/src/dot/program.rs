@@ -42,7 +42,7 @@ pub struct Room {
     pub owner: Pubkey,
     pub cur_price: u64,
     pub is_locked: bool,
-    pub guests: Vec<Mutable<Guest>>,
+    pub guests: [Mutable<Guest>; 10],
 }
 
 impl<'info, 'entrypoint> Room {
@@ -99,7 +99,7 @@ pub struct LoadedRoom<'info, 'entrypoint> {
     pub owner: Pubkey,
     pub cur_price: u64,
     pub is_locked: bool,
-    pub guests: Mutable<Vec<Mutable<Guest>>>,
+    pub guests: Mutable<[Mutable<Guest>; 10]>,
 }
 
 pub fn buy_key_handler<'info>(
