@@ -6,6 +6,11 @@ declare_id('Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS')
 class Guest:
     keys_owned: u8
     address: Pubkey
+    
+# class Guests(NamedTuple):
+#     id:Pubkey
+    
+    
 
 class BuySell(Enum):
     BUY = 1
@@ -16,18 +21,18 @@ class Room(Account):
     owner: Pubkey
     cur_price: u64
     is_locked: bool
-    guests: Array[Tuple[Pubkey, Guest],10000]
+    guests: Array[Guest,10000]
 
     def leading_guest(self) -> Guest:
-        leading_guest = None
 
-        for guest_tuple in self.guests:
-            guest = guest_tuple[1]
-            if leading_guest is None or guest.keys_owned > leading_guest.keys_owned:
-                leading_guest = guest
-                
+        for guestI in self.guests:
+            guest:Guest = guestI
+            leading_guest:Guest 
+            
+            if leading_guest is None or guest.keys_owned> leading_guest.keys_owned:
+                leading_guest = guest   
+                return leading_guest             
 
-        return leading_guest
 
     # def inc_keys_owned(self, inc_val: BuySell, guest_pubkey: Pubkey) -> Guest:
     #     for idx, guest_tuple in enumerate(self.guests):
