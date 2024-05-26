@@ -21,18 +21,18 @@ class Room(Account):
     owner: Pubkey
     cur_price: u64
     is_locked: bool
-    guests: Array[Guest,10000]
+    guests: Array[Guest,1000]
 
-    def leading_guest(self) -> Guest:
-        leading_guest:Guest
-
-        for guestI in self.guests:
-            guest:Guest = guestI
-            if leading_guest is None or guest.keys_owned> leading_guest.keys_owned:
-                leading_guest = guest
-                return leading_guest
-
-        return leading_guest
+    # def leading_guest(self) -> Guest:
+    #     leading_guest:Guest
+    #
+    #     for guestI in self.guests:
+    #         guest:Guest = guestI
+    #         if leading_guest is None or guest.keys_owned> leading_guest.keys_owned:
+    #             leading_guest = guest
+    #             return leading_guest
+    #
+    #     return leading_guest
 
     # def inc_keys_owned(self, inc_val: BuySell, guest_pubkey: Pubkey) -> Guest:
     #     for idx, guest_tuple in enumerate(self.guests):
@@ -43,23 +43,23 @@ class Room(Account):
     #             return guest
        
 
-    def get_guest(self, guest_pubkey: Pubkey) -> Guest:
-        for guest_tuple in self.guests:
-            if guest_tuple[0] == guest_pubkey:
-                return guest_tuple[1]
+    # def get_guest(self, guest_pubkey: Pubkey) -> Guest:
+    #     for guest_tuple in self.guests:
+    #         if guest_tuple[0] == guest_pubkey:
+    #             return guest_tuple[1]
         
 @instruction
-def init_room(owner: Pubkey, room: Empty[Room], room_id: u64, price: u64):
-    room.init(
-        owner=owner.key,
-        price=5980500,
+def init_room(owner: Signer, room: Empty[Room]):
+    room = room.init(
+        payer=owner,
+        seeds=['Rizz',owner,'room', 'rizz'],
+        # space=,
+        # padding=,
     )
-    room.id = room_id
-    room.owner = owner
-    room.cur_price = price
+    room.id = 0
+    room.owner = owner.key()
+    room.cur_price =17963000
     room.is_locked = False
-    room.guests = []
-    room.save()
 
 @instruction
 def buy_key(room: Room, buyer: Signer):
@@ -67,29 +67,25 @@ def buy_key(room: Room, buyer: Signer):
     assert room.cur_price < 0, "Key is not available for sale"
 
     buyer.transfer_lamports(room, room.cur_price)
-    buyer.save()
 
-    room.cur_price *= 1.1
+    room.cur_price +=1 #TODO
     # room.inc_keys_owned(BuySell.BUY, buyer.key()) FIXME:
-    room.save()
 
 @instruction
 def sell_key(room: Room, seller: Signer):
     assert not room.is_locked, "Room is already locked"
 
-    room.transfer_lamports(room, seller.cur_price)
-    room.cur_price /= 1.1
-    
-    # TODO: inc_keys
-    room.save()
-    seller.save()
+    room.transfer_lamports(seller, room.cur_price)
+    room.cur_price-= u64(room.cur_price*.1)
+    #TODO: inc
 
-@instruction
-def leading_guest(room: Room) -> Guest:
-    guest = room.leading_guest()
-    assert guest, "No Guests so far"
-    return guest
+# @instruction
+# def leading_guest(room: Room) -> Guest:
+#     # guest = room.leading_guest()
+#     assert guest, "No Guests so far"
+#     return guest
 
 @instruction
 def get_user(room: Room, user: Pubkey):
-    room.get_guest(user)
+    pass
+    # get_guest(user)
