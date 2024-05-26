@@ -176,3 +176,23 @@ pub fn sell_key_handler<'info>(
 
     assign!(room.borrow_mut().cur_price, room.borrow().cur_price - 2);
 }
+
+// Implement BorshSerialize and BorshDeserialize for Mutable<T>
+impl<T> BorshSerialize for Mutable<T>
+where
+    T: BorshSerialize,
+{
+    fn serialize<W: std::io::Write>(&self, writer: &mut W) -> std::io::Result<()> {
+        self.borrow().serialize(writer)
+    }
+}
+
+impl<T> BorshDeserialize for Mutable<T>
+where
+    T: BorshDeserialize,
+{
+    fn deserialize(buf: &mut &[u8]) -> std::io::Result<Self> {
+        let value = T::deserialize(buf)?;
+        Ok(Mutable::new(value))
+    }
+}
