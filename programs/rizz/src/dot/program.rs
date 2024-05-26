@@ -19,7 +19,7 @@ impl Default for BuySell {
     }
 }
 
-#[derive(Clone, Debug, Default, BorshSerialize, BorshDeserialize)]
+#[derive(Clone, Debug, Default, BorshSerialize, BorshDeserialize,Copy)]
 pub struct Guest {
     pub keys_owned: u8,
     pub address: Pubkey,
@@ -43,7 +43,7 @@ pub struct Room {
     pub owner: Pubkey,
     pub cur_price: u64,
     pub is_locked: bool,
-    pub guests: [Mutable<Guest>; 10],
+    pub guests: [Mutable<Guest>;10],
 }
 
 impl<'info, 'entrypoint> Room {
