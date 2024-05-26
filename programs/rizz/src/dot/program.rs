@@ -5,6 +5,7 @@ use crate::{id, seahorse_util::*};
 use anchor_lang::{prelude::*, solana_program};
 use anchor_spl::token::{self, Mint, Token, TokenAccount};
 use std::{cell::RefCell, rc::Rc};
+use anchor_lang::prelude::borsh::{BorshSerialize, BorshDeserialize};
 
 #[derive(Clone, Debug, PartialEq, AnchorSerialize, AnchorDeserialize, Copy)]
 pub enum BuySell {
@@ -18,7 +19,7 @@ impl Default for BuySell {
     }
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, BorshSerialize, BorshDeserialize)]
 pub struct Guest {
     pub keys_owned: u8,
     pub address: Pubkey,
