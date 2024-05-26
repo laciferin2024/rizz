@@ -19,7 +19,7 @@ impl Default for BuySell {
     }
 }
 
-#[derive(Clone, Debug, Default, BorshSerialize, BorshDeserialize,Copy)]
+#[derive(Clone, Debug, Default, Copy, BorshSerialize, BorshDeserialize)]
 pub struct Guest {
     pub keys_owned: u8,
     pub address: Pubkey,
@@ -43,7 +43,7 @@ pub struct Room {
     pub owner: Pubkey,
     pub cur_price: u64,
     pub is_locked: bool,
-    pub guests: [Mutable<Guest>;10],
+    pub guests: Vec<Mutable<Guest>>, // Use Vec directly
 }
 
 impl<'info, 'entrypoint> Room {
@@ -54,8 +54,8 @@ impl<'info, 'entrypoint> Room {
         let id = account.id;
         let owner = account.owner.clone();
         let cur_price = account.cur_price;
-        let is_locked = account.is_locked.clone();
-        let guests = Mutable::new(account.guests.clone());
+        let is_locked = account.is_locked;
+        let guests = account.guests.clone(); // No need for Mutable here
 
         Mutable::new(LoadedRoom {
             __account__: account,
@@ -71,24 +71,19 @@ impl<'info, 'entrypoint> Room {
     pub fn store(loaded: Mutable<LoadedRoom>) {
         let mut loaded = loaded.borrow_mut();
         let id = loaded.id;
-
         loaded.__account__.id = id;
 
         let owner = loaded.owner.clone();
-
         loaded.__account__.owner = owner;
 
         let cur_price = loaded.cur_price;
-
         loaded.__account__.cur_price = cur_price;
 
-        let is_locked = loaded.is_locked.clone();
-
+        let is_locked = loaded.is_locked;
         loaded.__account__.is_locked = is_locked;
 
-        let guests = loaded.guests.borrow().clone();
-
-        loaded.__account__.guests = guests;
+        let guests = loaded.guests.clone();
+        loaded.__account__.guests = guests; // No need for Mutable here
     }
 }
 
@@ -100,7 +95,7 @@ pub struct LoadedRoom<'info, 'entrypoint> {
     pub owner: Pubkey,
     pub cur_price: u64,
     pub is_locked: bool,
-    pub guests: Mutable<[Mutable<Guest>; 10]>,
+    pub guests: Vec<Mutable<Guest>>, // Use Vec directly
 }
 
 pub fn buy_key_handler<'info>(
@@ -141,12 +136,10 @@ pub fn init_room_handler<'info>(
     let mut room = room.account.clone();
 
     assign!(room.borrow_mut().id, 0);
-
     assign!(room.borrow_mut().owner, owner.key());
-
     assign!(room.borrow_mut().cur_price, 17963000);
-
     assign!(room.borrow_mut().is_locked, false);
+    assign!(room.borrow_mut().guests, Vec::new()); // Initialize guests vector
 }
 
 pub fn sell_key_handler<'info>(
