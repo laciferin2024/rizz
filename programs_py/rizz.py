@@ -21,7 +21,7 @@ class Room(Account):
     owner: Pubkey
     cur_price: u64
     is_locked: bool
-    guests: Array[Guest,1000]
+    guests: List[Guest]
 
     # def leading_guest(self) -> Guest:
     #     leading_guest:Guest
@@ -68,7 +68,7 @@ def buy_key(room: Room, buyer: Signer):
 
     buyer.transfer_lamports(room, room.cur_price)
 
-    room.cur_price += u64(room.cur_price*.1)
+    room.cur_price += 2 #u64(room.cur_price*.1)
     # room.inc_keys_owned(BuySell.BUY, buyer.key()) FIXME:
 
 @instruction
@@ -76,7 +76,7 @@ def sell_key(room: Room, seller: Signer):
     assert not room.is_locked, "Room is already locked"
 
     room.transfer_lamports(seller, room.cur_price)
-    room.cur_price-= u64(room.cur_price*.1)
+    room.cur_price-= 2 #u64(room.cur_price*.1)
     #TODO: inc
 
 # @instruction
