@@ -30,8 +30,11 @@ setup:
 seahorse *ARGS:
   seahorse {{ARGS}}
 
-build:  
+sbuild:  
   seahorse build 
+  
+build:
+  anchor build
 
 b: build
 

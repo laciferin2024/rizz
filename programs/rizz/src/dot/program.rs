@@ -124,7 +124,7 @@ pub fn buy_key_handler<'info>(
     )
     .unwrap();
 
-    assign!(room.borrow_mut().cur_price, room.borrow().cur_price + 2);
+    assign!(room.borrow_mut().cur_price, (room.borrow().cur_price as f64 * 1.1).round() as u64);
 }
 
 pub fn get_user_handler<'info>(mut room: Mutable<LoadedRoom<'info, '_>>, mut user: Pubkey) -> () {}
@@ -167,7 +167,7 @@ pub fn sell_key_handler<'info>(
             .unwrap() += amount;
     };
 
-    assign!(room.borrow_mut().cur_price, room.borrow().cur_price - 2);
+    assign!(room.borrow_mut().cur_price, (room.borrow().cur_price as f64 / 1.1).round() as u64);
 }
 
 // Implement BorshSerialize and BorshDeserialize for Mutable<T>
